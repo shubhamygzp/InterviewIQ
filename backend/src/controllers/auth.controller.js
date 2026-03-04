@@ -53,6 +53,13 @@ async function registerUserController(req, res) {
   });
 }
 
+
+
+/**
+ * @name loginUserController
+ * @description login a user, expects email and password in the request body
+ * @access Public
+ */
 async function loginUserController(req, res) {
   const { email, password } = req.body;
 
@@ -73,7 +80,7 @@ async function loginUserController(req, res) {
   }
 
   const token = jwt.sign(
-    { id: user._id, username: user.username },
+    { id: user._id, userName: user.userName },
     process.env.JWT_SECRET,
     { expiresIn: "1d" },
   );
@@ -84,12 +91,19 @@ async function loginUserController(req, res) {
     message: "User loggedIn successfully.",
     user: {
       id: user._id,
-      username: user.username,
+      userName: user.userName,
       email: user.email,
     },
   });
 }
 
+
+
+/**
+ * @name logoutUserController
+ * @description clear token from user cookie and add the token in blacklist
+ * @access public
+ */
 async function logoutUserController(req, res) {
   const token = req.cookies.token;
 
@@ -106,10 +120,31 @@ async function logoutUserController(req, res) {
 
 
 
+/**
+ * @name getMeController
+ * @description get the current logged in user details.
+ * @access private
+ */
+async function getMeController(req, res) {
+
+    const user = await userModel.findById(req.user.id);
+
+
+    res.status(200).json({
+        message: "User details fetched successfully",
+        user: {
+            id: user._id,
+            userName: user.userName,
+            email: user.email
+        }
+    })
+
+}
 
 
 module.exports = {
   registerUserController,
   loginUserController,
   logoutUserController,
+  getMeController
 };
