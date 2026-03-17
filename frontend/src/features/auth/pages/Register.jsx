@@ -13,11 +13,11 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="userName">Username</label>
             <input
               type="text"
-              id="username"
-              name="username"
+              id="userName"
+              name="userName"
               placeholder="Enter Username"
             />
           </div>
