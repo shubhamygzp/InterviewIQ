@@ -1,18 +1,22 @@
 // ── Shared Variables (mirrors home.scss theme) ────────────────────────────────
-$bg-page:      #0d1117;
-$bg-card:      #161b22;
-$bg-panel:     #1c2230;
-$bg-input:     #1e2535;
+$bg-page: #0d1117;
+$bg-card: #161b22;
+$bg-panel: #1c2230;
+$bg-input: #1e2535;
 $border-color: #2a3348;
 $text-primary: #e6edf3;
-$text-muted:   #7d8590;
-$accent:       #ff2d78;
-$font-stack:   system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$text-muted: #7d8590;
+$accent: #ff2d78;
+$font-stack: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 // severity palette
-$severity-high:   #ff4d4d;
+$severity-high: #ff4d4d;
 $severity-medium: #f5a623;
-$severity-low:    #3fb950;
+$severity-low: #3fb950;
+
+*::-webkit-scrollbar {
+    display: none;
+}
 
 // ── Page Shell ────────────────────────────────────────────────────────────────
 .interview-page {
@@ -36,8 +40,7 @@ $severity-low:    #3fb950;
     background-color: $bg-card;
     border: 1px solid $border-color;
     border-radius: 1rem;
-    overflow: hidden;
-    min-height: calc(100vh - 3rem);
+    justify-content: space-between;
 }
 
 .interview-divider {
@@ -53,7 +56,11 @@ $severity-low:    #3fb950;
     padding: 1.75rem 1rem;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     gap: 0.25rem;
+
+
+
 
     &__label {
         font-size: 0.7rem;
@@ -108,9 +115,20 @@ $severity-low:    #3fb950;
     flex: 1;
     padding: 1.75rem 2rem;
     overflow-y: auto;
+    min-height: initial;
+    max-height: calc(100vh - 3rem);
+    padding-bottom: 5rem;
+    align-items: flex-start;
+
+
+
+
+
+
+
 
     section {
-        height: 100%;
+        min-height: 100%;
     }
 }
 
@@ -377,9 +395,17 @@ $severity-low:    #3fb950;
         justify-content: center;
         border: 4px solid;
 
-        &.score--high  { border-color: $severity-low;    }
-        &.score--mid   { border-color: $severity-medium;  }
-        &.score--low   { border-color: $severity-high;    }
+        &.score--high {
+            border-color: $severity-low;
+        }
+
+        &.score--mid {
+            border-color: $severity-medium;
+        }
+
+        &.score--low {
+            border-color: $severity-high;
+        }
     }
 
     &__value {
