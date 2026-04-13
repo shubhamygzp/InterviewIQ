@@ -18,7 +18,7 @@ async function authUser(req, res, next) {
 
   if (isTokenBlacklisted) {
     return res.status(401).json({
-      message: "Tgit pushoken is invalid",
+      message: "Token is invalid",
     });
   }
 
