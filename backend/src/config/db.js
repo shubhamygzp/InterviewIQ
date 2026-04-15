@@ -6,7 +6,8 @@ async function connectToDB() {
     console.log("Connected to Database");
   } 
   catch (error) {
-    console.log(error);
+    console.log("Database connection failed:", error.message);
+    process.exit(1); // Stop the server if DB connection fails
   }
 }
 
