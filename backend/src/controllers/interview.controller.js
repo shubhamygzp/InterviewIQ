@@ -10,14 +10,23 @@ const preparationReportModel = require("../models/preparationReport.model.js");
  */
 async function generateInterViewReportController(req, res) {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "Resume file is required" });
+    const { selfDescription, jobDescription } = req.body;
+
+    if (!jobDescription || !jobDescription.trim()) {
+      return res.status(400).json({ message: "Job description is required" });
     }
 
-    const data = await pdfParse(req.file.buffer);
-    const resumeText = data.text;
+    if (!req.file && (!selfDescription || !selfDescription.trim())) {
+      return res.status(400).json({
+        message: "Either resume file or self description is required",
+      });
+    }
 
-    const { selfDescription, jobDescription } = req.body;
+    let resumeText = "";
+    if (req.file) {
+      const data = await pdfParse(req.file.buffer);
+      resumeText = data.text;
+    }
 
     const interViewReportByAi = await generatePreparationReport({
       resume: resumeText,
