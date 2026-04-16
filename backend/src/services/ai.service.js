@@ -68,6 +68,23 @@ async function generateWithRetry(fn, retries = 2) {
   }
 }
 
+function parseModelJson(text) {
+  const cleaned = text.replace(/```json|```/g, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch (_) {
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      throw new Error("Model did not return valid JSON content.");
+    }
+
+    const jsonSlice = cleaned.slice(firstBrace, lastBrace + 1);
+    return JSON.parse(jsonSlice);
+  }
+}
+
 async function generatePreparationReport({
   resume,
   selfDescription,
@@ -149,11 +166,7 @@ Job Description: ${jobDescription}
     });
 
     const text = completion.choices[0].message.content;
-
-    
-    const cleaned = text.replace(/```json|```/g, "").trim();
-
-    const parsed = JSON.parse(cleaned);
+    const parsed = parseModelJson(text);
 
     
     const validated = preparationReportSchema.parse(parsed);
@@ -167,17 +180,32 @@ Job Description: ${jobDescription}
 
 // For Generating Resume
 async function generatePdfFromHtml(htmlContent) {
-  const browser = await puppeteer.launch({
+  let browser = null;
+  const launchOptions = {
     headless: "new",
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
+      "--no-zygote",
+      "--single-process",
     ],
-    executablePath:
-      process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-  });
+  };
+
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+
+  try {
+    browser = await puppeteer.launch(launchOptions);
+  } catch (launchError) {
+    console.error("Primary Puppeteer launch failed:", launchError.message);
+    browser = await puppeteer.launch({
+      ...launchOptions,
+      executablePath: undefined,
+    });
+  }
 
   try {
     const page = await browser.newPage();
@@ -196,7 +224,9 @@ async function generatePdfFromHtml(htmlContent) {
 
     return pdfBuffer;
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
@@ -239,9 +269,11 @@ Job Description: ${jobDescription}
     });
 
     const text = completion.choices[0].message.content;
-    const cleaned = text.replace(/```json|```/g, "").trim();
+    const parsed = parseModelJson(text);
 
-    const parsed = JSON.parse(cleaned);
+    if (!parsed.html || typeof parsed.html !== "string") {
+      throw new Error("Model response missing HTML payload.");
+    }
 
     const pdfBuffer = await generatePdfFromHtml(parsed.html);
 
