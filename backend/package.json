@@ -13,6 +13,7 @@
   "type": "commonjs",
   "dependencies": {
     "@google/genai": "^1.46.0",
+    "@sparticuz/chromium": "^147.0.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -25,6 +26,7 @@
     "path": "^0.12.7",
     "pdf-parse": "^2.4.5",
     "puppeteer": "^24.40.0",
+    "puppeteer-core": "^24.41.0",
     "zod": "^4.3.6",
     "zod-to-json-schema": "^3.25.1"
   }

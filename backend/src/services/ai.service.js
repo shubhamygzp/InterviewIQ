@@ -1,6 +1,8 @@
 const Groq = require("groq-sdk");
 const { z } = require("zod");
 const puppeteer = require("puppeteer");
+const puppeteerCore = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 
 
@@ -181,35 +183,44 @@ Job Description: ${jobDescription}
 // For Generating Resume
 async function generatePdfFromHtml(htmlContent) {
   let browser = null;
-  const launchOptions = {
-    headless: "new",
+
+  const localLaunchOptions = {
+    headless: true,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
-      "--no-zygote",
-      "--single-process",
     ],
   };
 
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
-
   try {
-    browser = await puppeteer.launch(launchOptions);
+    if (process.env.NODE_ENV === "production") {
+      const executablePath =
+        process.env.PUPPETEER_EXECUTABLE_PATH ||
+        (await chromium.executablePath());
+
+      browser = await puppeteerCore.launch({
+        args: [...chromium.args, ...localLaunchOptions.args],
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
+        headless: chromium.headless,
+      });
+    } else {
+      browser = await puppeteer.launch({
+        ...localLaunchOptions,
+        executablePath:
+          process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+      });
+    }
   } catch (launchError) {
-    console.error("Primary Puppeteer launch failed:", launchError.message);
-    browser = await puppeteer.launch({
-      ...launchOptions,
-      executablePath: undefined,
-    });
+    console.error("Puppeteer launch failed:", launchError.message);
+    browser = await puppeteer.launch(localLaunchOptions);
   }
 
   try {
     const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+    await page.setContent(htmlContent, { waitUntil: "domcontentloaded" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
