@@ -38,7 +38,7 @@ export const useInterview = () => {
       setLoading(false);
     }
 
-    return response.interviewReport;
+    return response?.interviewReport;
   };
 
 

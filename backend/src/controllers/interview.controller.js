@@ -12,11 +12,13 @@ async function generateInterViewReportController(req, res) {
   try {
     const { selfDescription, jobDescription } = req.body;
 
-    if (!jobDescription || !jobDescription.trim()) {
+    if (!jobDescription || !jobDescription.trim() || jobDescription === "undefined") {
       return res.status(400).json({ message: "Job description is required" });
     }
 
-    if (!req.file && (!selfDescription || !selfDescription.trim())) {
+    const hasSelfDesc = selfDescription && selfDescription.trim() && selfDescription !== "undefined" && selfDescription !== "null";
+
+    if (!req.file && !hasSelfDesc) {
       return res.status(400).json({
         message: "Either resume file or self description is required",
       });
@@ -24,20 +26,25 @@ async function generateInterViewReportController(req, res) {
 
     let resumeText = "";
     if (req.file) {
+      if (req.file.mimetype !== "application/pdf") {
+        return res.status(400).json({ message: "Only PDF resumes are supported." });
+      }
       const data = await pdfParse(req.file.buffer);
       resumeText = data.text;
     }
 
+    const finalSelfDescription = hasSelfDesc ? selfDescription : "";
+
     const interViewReportByAi = await generatePreparationReport({
       resume: resumeText,
-      selfDescription,
+      selfDescription: finalSelfDescription,
       jobDescription,
     });
 
     const interviewReport = await preparationReportModel.create({
       user: req.user.id,
       resume: resumeText,
-      selfDescription,
+      selfDescription: finalSelfDescription,
       jobDescription,
       ...interViewReportByAi,
     });

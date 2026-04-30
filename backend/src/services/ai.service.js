@@ -13,7 +13,7 @@ const groq = new Groq({
 
 
 const preparationReportSchema = z.object({
-  matchScore: z.number().min(0).max(100),
+  matchScore: z.coerce.number().min(0).max(100),
 
   technicalQuestions: z
     .array(
@@ -128,21 +128,27 @@ JSON FORMAT:
       "intention": "string",
       "answer": "string"
     }
-  ],
-  "behavioralQuestions": [],
+  ], // MUST contain at least 3 items
+  "behavioralQuestions": [
+    {
+      "question": "string",
+      "intention": "string",
+      "answer": "string"
+    }
+  ], // MUST contain at least 3 items
   "skillGaps": [
     {
       "skill": "string",
       "severity": "low | medium | high"
     }
-  ],
+  ], // MUST contain at least 2 items
   "preparationPlan": [
     {
       "day": number,
       "focus": "string",
       "tasks": ["string"]
     }
-  ]
+  ] // MUST contain at least 5 items
 }
 
 Candidate Details:
