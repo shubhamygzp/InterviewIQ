@@ -55,7 +55,7 @@ async function generateInterViewReportController(req, res) {
     });
   } catch (error) {
     console.error("Interview Error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 }
 
@@ -143,7 +143,8 @@ async function generateResumePdfController(req, res) {
     console.error("PDF Generation Error:", error); // 🔥 VERY IMPORTANT
 
     res.status(500).json({
-      message: "Failed to generate resume PDF"
+      message: "Failed to generate resume PDF",
+      error: error.message
     });
   }
 }
