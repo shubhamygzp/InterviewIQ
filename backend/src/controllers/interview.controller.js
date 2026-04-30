@@ -1,4 +1,4 @@
-const pdfParse = require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 const { generatePreparationReport, generateResumePdf } = require("../services/ai.service.js");
 const preparationReportModel = require("../models/preparationReport.model.js");
 
@@ -29,7 +29,9 @@ async function generateInterViewReportController(req, res) {
       if (req.file.mimetype !== "application/pdf") {
         return res.status(400).json({ message: "Only PDF resumes are supported." });
       }
-      const data = await pdfParse(req.file.buffer);
+      const parser = new PDFParse({ data: req.file.buffer });
+      const data = await parser.getText();
+      await parser.destroy();
       resumeText = data.text;
     }
 
